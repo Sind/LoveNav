@@ -6,6 +6,8 @@ POINT_COLOR = {0,0,255,200}
 TRIANGLE_LINE = {green = {0,200,0,100}, red = {200,0,0,100}}
 TRIANGLE_FILL = {green = {0,255,0,100}, red = {255,0,0,100}}
 POINTER_COLOR = {points = {0,0,255,100}, green = {0,255,0,100},red = {255,0,0,100}}
+
+SCALING_FACTOR = 0.95
 function love.load()
 	love.window.setMode(0,0,{fullscreen = true})
 	WINDOW_WIDTH, WINDOW_HEIGHT = love.window.getDimensions()
@@ -46,6 +48,18 @@ function love.draw()
 		v:draw()
 	end
 	love.graphics.setColor(POINTER_COLOR[mode])
+	if mode == "green" or mode == "red" then
+		if #currentTriangle > 0 then
+			local line = {}
+			for i,v in ipairs(currentTriangle) do
+				line[#line+1] = v.x
+				line[#line+1] = v.y
+			end
+			line[#line+1] = latestPosition.x
+			line[#line+1] = latestPosition.y
+			love.graphics.line(line)
+		end
+	end
 	love.graphics.circle("fill",latestPosition.x,latestPosition.y,POINT_RADIUS/scale)
 	love.graphics.setColor(WHITE)
 
@@ -61,14 +75,15 @@ function love.mousepressed(x,y,button)
 	y = y - translate.y
 	x = x / scale
 	y = y / scale
-	if button == "wd" then
-		scale = scale - 0.1
-		translate.x = translate.x + x * 0.1
-		translate.y = translate.y + y * 0.1
-	elseif button == "wu" then
-		scale = scale + 0.1
-		translate.x = translate.x - x * 0.1
-		translate.y = translate.y - y * 0.1
+	if button == "wd" or button == "wu" then
+		local oldscale = scale
+		if button == "wd" then
+			scale = scale * SCALING_FACTOR
+		elseif button == "wu" then
+			scale = scale / SCALING_FACTOR
+		end
+		translate.x = translate.x + x * (oldscale - scale)
+		translate.y = translate.y + y * (oldscale - scale)
 	end
 	if button == "l" then
 		if mode == "points" then
@@ -81,14 +96,15 @@ function love.mousepressed(x,y,button)
 					if #currentTriangle == 3 then
 						local t = triangle:new(#triangles+1,mode,currentTriangle)
 						triangles[#triangles+1] = t
-						if mode == "green" then
-							currentTriangle[1]:addNeighbor(currentTriangle[2])
-							currentTriangle[1]:addNeighbor(currentTriangle[3])
-							currentTriangle[2]:addNeighbor(currentTriangle[1])
-							currentTriangle[2]:addNeighbor(currentTriangle[3])
-							currentTriangle[3]:addNeighbor(currentTriangle[1])
-							currentTriangle[3]:addNeighbor(currentTriangle[2])
-						end
+						-- NOTE TO SELF: Do this upon save instead
+						-- if mode == "green" then
+						-- 	currentTriangle[1]:addNeighbor(currentTriangle[2])
+						-- 	currentTriangle[1]:addNeighbor(currentTriangle[3])
+						-- 	currentTriangle[2]:addNeighbor(currentTriangle[1])
+						-- 	currentTriangle[2]:addNeighbor(currentTriangle[3])
+						-- 	currentTriangle[3]:addNeighbor(currentTriangle[1])
+						-- 	currentTriangle[3]:addNeighbor(currentTriangle[2])
+						-- end
 						currentTriangle = {}
 					end
 				end
