@@ -9,13 +9,15 @@ POINTER_COLOR = {points = {0,0,255,100}, green = {0,255,0,100},red = {255,0,0,10
 
 SCALING_FACTOR = 0.95
 function love.load()
-	love.window.setMode(0,0,{fullscreen = true})
-	WINDOW_WIDTH, WINDOW_HEIGHT = love.window.getDimensions()
 	require "class"
-	image = love.graphics.newImage("background.png")
 	require "point"
 	require "triangle"
+	require "saveMesh"
+	require "persistence"
 	mode = "points"
+	love.window.setMode(0,0,{fullscreen = true})
+	WINDOW_WIDTH, WINDOW_HEIGHT = love.window.getDimensions()
+	image = love.graphics.newImage("background.png")
 	points = {}
 	triangles = {}
 	translate = {x=0,y=0}
@@ -87,24 +89,15 @@ function love.mousepressed(x,y,button)
 	end
 	if button == "l" then
 		if mode == "points" then
-			local p = point:new(#points+1,x,y)
+			local p = point:new(x,y)
 			points[#points+1] = p
 		elseif mode == "green" or mode == "red" then
 			for i,v in ipairs(points) do
 				if dist(v,{x=x,y=y}) < ALLOWED_DISTANCE then
 						currentTriangle[#currentTriangle+1] = v
 					if #currentTriangle == 3 then
-						local t = triangle:new(#triangles+1,mode,currentTriangle)
+						local t = triangle:new(mode,currentTriangle)
 						triangles[#triangles+1] = t
-						-- NOTE TO SELF: Do this upon save instead
-						-- if mode == "green" then
-						-- 	currentTriangle[1]:addNeighbor(currentTriangle[2])
-						-- 	currentTriangle[1]:addNeighbor(currentTriangle[3])
-						-- 	currentTriangle[2]:addNeighbor(currentTriangle[1])
-						-- 	currentTriangle[2]:addNeighbor(currentTriangle[3])
-						-- 	currentTriangle[3]:addNeighbor(currentTriangle[1])
-						-- 	currentTriangle[3]:addNeighbor(currentTriangle[2])
-						-- end
 						currentTriangle = {}
 					end
 				end
@@ -126,8 +119,9 @@ end
 
 function love.keypressed(key)
 	if key == "escape" then
+		saveMesh()
 		love.event.quit()
-	elseif key == "p" or key == "1" then
+	elseif key == "p" or key == "b" or key == "1" then
 		mode = "points"
 	elseif key == "g" or key == "2" then
 		mode = "green"
