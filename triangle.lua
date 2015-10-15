@@ -19,10 +19,22 @@ end
 
 function triangle:simplify()
 	local tpoints = {}
-	for i,v in ipairs(self.points) do
-		tpoints[#tpoints+1] = getPointIndex(v)
+	local a = getPointIndex(self.points[1])
+	local b = getPointIndex(self.points[2])
+	local c = getPointIndex(self.points[3])
+	if self:orientation() then
+		tpoints = {a,b,c}
+	else
+		tpoints = {a,c,b}
 	end
 	return {points = tpoints, passable = (self.color == "green")}
+end
+
+function triangle:orientation()
+	local a = self.points[1]
+	local b = self.points[2]
+	local c = self.points[3]
+	return determinant(b.x-a.x, b.y-a.y, c.x-a.x, c.y-a.y) < 0
 end
 
 function getTriangleIndex(triangle)

@@ -37,3 +37,8 @@ end
 function samePoint(a,b)
 	return (a.x == b.x and a.y == b.y)
 end
+
+
+function determinant(x1,y1,x2,y2)
+	return x1*y2 - x2*y1
+end
