@@ -80,6 +80,7 @@ end
 function navmesh:findCoarsePath(x1,y1,x2,y2)
 	local start = self:findTriangle(x1,y1)
 	local stop = self:findTriangle(x2,y2)
+	print(start,stop)
 	if (start == nil) or (stop == nil) then return nil end
 	local stopCenter = {x = x2, y = y2}
 	local currentCenter = self.triangles[start].center
@@ -94,7 +95,12 @@ function navmesh:findCoarsePath(x1,y1,x2,y2)
 				end
 			end
 		end
-		table.remove(open,table.getIndex(open,currentItem))
+		for i,v in ipairs(open) do
+			if currentItem.i == v.i then
+				table.remove(open,i)
+				break
+			end
+		end
 		closed[#closed+1] = currentItem
 		if currentItem.i == stop then
 			local coarsePath = {currentItem.i}
@@ -114,8 +120,21 @@ function navmesh:findCoarsePath(x1,y1,x2,y2)
 		local neighbors = currentTriangle.neighbors
 		local edges = currentTriangle.edges
 		for i,v in ipairs(neighbors) do
-			if not table.getIndex(closed,v) then
-				local index = table.getIndex(open,v)
+			local isclosed = false
+			for j,u in ipairs(closed) do
+				if v == u.i then
+					isclosed = true
+					break
+				end
+			end
+			if not isclosed then
+				local index = nil
+				for j,u in ipairs(open) do
+					if u.i == v then
+						index = j
+						break
+					end
+				end
 				if not index then
 					local item = {}
 					item.i = v
