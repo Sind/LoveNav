@@ -17,16 +17,6 @@ function triangle:draw()
 	love.graphics.setColor(WHITE)
 end
 
-function triangle:pairNeighbors()
-
-	self.points[1]:addNeighbor(self.points[2])
-	self.points[1]:addNeighbor(self.points[3])
-	self.points[2]:addNeighbor(self.points[1])
-	self.points[2]:addNeighbor(self.points[3])
-	self.points[3]:addNeighbor(self.points[1])
-	self.points[3]:addNeighbor(self.points[2])
-end
-
 function triangle:simplify()
 	local tpoints = {}
 	for i,v in ipairs(self.points) do

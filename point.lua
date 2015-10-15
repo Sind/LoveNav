@@ -3,36 +3,16 @@ point = class()
 function point:init(x,y)
 	self.x = x
 	self.y = y
-	self.neighbors = {}
 	self.triangles = {}
 end
 
-function point:resetNeighbors()
-	self.neighbors = {}
-end
-
-function point:addNeighbor(n)
-	if not self:containsNeighbor(n) then
-		self.neighbors[#self.neighbors+1] = n
-	end
-end
 
 function point:addTriangle(t)
 	self.triangles[#self.triangles+1] = t
 end
 
-function point:containsNeighbor(n)
-	for i,v in ipairs(self.neighbors) do
-		if samePoint(n,v) then return true end
-	end
-	return false
-end
-
 function point:simplify()
-	local simplePoint = {x = self.x, y = self.y, neighbors = {}}
-	for i,v in ipairs(self.neighbors) do
-		simplePoint.neighbors[#simplePoint.neighbors+1] = getPointIndex(v)
-	end
+	local simplePoint = {x = self.x, y = self.y}
 	return simplePoint
 
 end

@@ -1,17 +1,13 @@
 
 --saves points, format:
--- x,y,{neighbors}
+-- x,y,{triangles}
 --pointers are reduced to indexes
 --saves triangles,format:
 -- {A,B,C},passable
 
 function saveMesh()
-	for i,v in ipairs(points) do
-		v:resetNeighbors()
-	end
 	local newtriangles = {}
 	for i,v in ipairs(triangles) do
-		if v.color == "green" then v:pairNeighbors() end
 		newtriangles[#newtriangles+1] = v:simplify()
 	end
 	local newpoints = {}
