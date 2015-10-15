@@ -8,7 +8,7 @@ WHITE = {255,255,255}
 POINT_COLOR = {0,0,255,200}
 TRIANGLE_LINE = {green = {0,200,0,100}, red = {200,0,0,100}}
 TRIANGLE_FILL = {green = {0,255,0,100}, red = {255,0,0,100}}
-POINTER_COLOR = {points = {0,0,255,100}, green = {0,255,0,100},red = {255,0,0,100}}
+POINTER_COLOR = {points = {0,0,255,100}, green = {0,255,0,100},red = {255,0,0,100}, delete = {0,0,0,100}}
 
 SCALING_FACTOR = 0.95
 function love.load()
@@ -96,6 +96,12 @@ function love.mousepressed(x,y,button)
 				local p = point:new(x,y)
 				points[#points+1] = p
 			end
+		elseif mode == "delete" then
+			for i,v in ipairs(triangles) do
+				if v:contains(x,y) then
+					v:remove()
+				end
+			end
 		elseif mode == "green" or mode == "red" then
 			for i,v in ipairs(points) do
 				if dist(v,{x=x,y=y}) < POINT_HIT_DISTANCE and not containsPoint(currentTriangle,v)then
@@ -133,6 +139,8 @@ function love.keypressed(key)
 		mode = "green"
 	elseif key == "r" or key == "3" then
 		mode = "red"
+	elseif key == "d" or key == "4" then
+		mode = "delete"
 	elseif key == " " then
 		moving2 = true
 	end

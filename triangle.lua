@@ -37,6 +37,27 @@ function triangle:orientation()
 	return determinant(b.x-a.x, b.y-a.y, c.x-a.x, c.y-a.y) < 0
 end
 
+function triangle:contains(x,y)
+	local a = self.points[1]
+	local b = self.points[2]
+	local c = self.points[3]
+	local ad = determinant(b.x-a.x,b.y-a.y,x-a.x,y-a.y)
+	local bd = determinant(c.x-b.x,c.y-b.y,x-b.x,y-b.y)
+	local cd = determinant(a.x-c.x,a.y-c.y,x-c.x,y-c.y)
+	local adb = (ad < 0)
+	local bdb = (bd < 0)
+	local cdb = (cd < 0)
+	return (adb and bdb and cdb) or (not (adb or bdb or cdb))
+end
+
+function triangle:remove()
+	for i,v in ipairs(self.points) do
+		v:removeTriangle(self)
+	end
+	local i = getTriangleIndex(self)
+	table.remove(triangles,i)
+end
+
 function getTriangleIndex(triangle)
 	for i,v in ipairs(triangles) do
 		if sameTriangle(triangle, v) then

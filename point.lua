@@ -11,6 +11,14 @@ function point:addTriangle(t)
 	self.triangles[#self.triangles+1] = t
 end
 
+function point:removeTriangle(t)
+	for i,v in ipairs(self.triangles) do
+		if sameTriangle(v,t) then
+			table.remove(self.triangles,i)
+		end
+	end
+end
+
 function point:simplify()
 	local simplePoint = {x = self.x, y = self.y}
 	return simplePoint
