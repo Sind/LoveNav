@@ -12,8 +12,8 @@ function point:addTriangle(t)
 end
 
 function point:remove()
-	while #self.triangles > 0 do
-		self.triangles[1]:remove()
+	for i = #self.triangles,1,-1 do
+		self.triangles[i]:remove()
 	end
 	local i = getPointIndex(self)
 	table.remove(points,i)
