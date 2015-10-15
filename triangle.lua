@@ -27,7 +27,7 @@ function triangle:simplify()
 	else
 		tpoints = {a,c,b}
 	end
-	return {points = tpoints, passable = (self.color == "green")}
+	return {points = tpoints, neighbors = {}, passable = (self.color == "green")}
 end
 
 function triangle:orientation()
