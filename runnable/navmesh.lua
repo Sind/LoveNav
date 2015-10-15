@@ -80,7 +80,6 @@ end
 function navmesh:findCoarsePath(x1,y1,x2,y2)
 	local start = self:findTriangle(x1,y1)
 	local stop = self:findTriangle(x2,y2)
-	print(start,stop)
 	if (start == nil) or (stop == nil) then return nil end
 	local stopCenter = {x = x2, y = y2}
 	local currentCenter = self.triangles[start].center
@@ -147,7 +146,7 @@ function navmesh:findCoarsePath(x1,y1,x2,y2)
 					local G = currentItem.G + edges[i]
 					local item = open[index]
 					if G < item.G then
-						item.parent = currentItem
+						item.parent = currentItem.i
 						item.G = G
 						item.F = item.H + G
 					end
