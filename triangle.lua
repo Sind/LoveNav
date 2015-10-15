@@ -4,6 +4,9 @@ function triangle:init(color,points)
 	self.color = color
 	self.points = points
 	self.coordinates = {points[1].x,points[1].y,points[2].x,points[2].y,points[3].x,points[3].y}
+	for i,v in ipairs(points) do
+		v:addTriangle(self)
+	end
 end
 
 function triangle:draw()

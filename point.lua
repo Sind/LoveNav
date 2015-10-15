@@ -4,6 +4,7 @@ function point:init(x,y)
 	self.x = x
 	self.y = y
 	self.neighbors = {}
+	self.triangles = {}
 end
 
 function point:resetNeighbors()
@@ -14,6 +15,10 @@ function point:addNeighbor(n)
 	if not self:containsNeighbor(n) then
 		self.neighbors[#self.neighbors+1] = n
 	end
+end
+
+function point:addTriangle(t)
+	self.triangles[#self.triangles+1] = t
 end
 
 function point:containsNeighbor(n)
@@ -38,6 +43,15 @@ function getPointIndex(point)
 			return i
 		end
 	end
+end
+
+function findPoint(x,y,distance)
+	for i,v in ipairs(points) do
+		if dist({x = x, y = y},v) < distance then
+			return v
+		end
+	end
+	return nil
 end
 
 function samePoint(a,b)

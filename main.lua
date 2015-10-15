@@ -1,6 +1,9 @@
-ALLOWED_DISTANCE = 7
+MIN_POINT_DISTANCE = 14
+POINT_HIT_DISTANCE = MIN_POINT_DISTANCE/2
+
 POINT_RADIUS = 4
 LINE_WIDTH = 4
+
 WHITE = {255,255,255}
 POINT_COLOR = {0,0,255,200}
 TRIANGLE_LINE = {green = {0,200,0,100}, red = {200,0,0,100}}
@@ -69,7 +72,7 @@ function love.draw()
 end
 
 function love.mousepressed(x,y,button)
-	if moving then return end
+	if moving or moving2 then return end
 	if button == "m" then
 		moving = true
 	end
@@ -89,11 +92,13 @@ function love.mousepressed(x,y,button)
 	end
 	if button == "l" then
 		if mode == "points" then
-			local p = point:new(x,y)
-			points[#points+1] = p
+			if not findPoint(x,y,MIN_POINT_DISTANCE) then
+				local p = point:new(x,y)
+				points[#points+1] = p
+			end
 		elseif mode == "green" or mode == "red" then
 			for i,v in ipairs(points) do
-				if dist(v,{x=x,y=y}) < ALLOWED_DISTANCE then
+				if dist(v,{x=x,y=y}) < POINT_HIT_DISTANCE then
 						currentTriangle[#currentTriangle+1] = v
 					if #currentTriangle == 3 then
 						local t = triangle:new(mode,currentTriangle)
@@ -106,7 +111,7 @@ function love.mousepressed(x,y,button)
 	end
 end
 function love.mousemoved(x,y,dx,dy)
-	if moving then
+	if moving or moving2 then
 		translate.x = translate.x + dx
 		translate.y = translate.y + dy
 	end
@@ -118,6 +123,7 @@ function love.mousereleased(x,y,button)
 end
 
 function love.keypressed(key)
+	if moving or monving2 then return end
 	if key == "escape" then
 		saveMesh()
 		love.event.quit()
@@ -127,6 +133,14 @@ function love.keypressed(key)
 		mode = "green"
 	elseif key == "r" or key == "3" then
 		mode = "red"
+	elseif key == " " then
+		moving2 = true
+	end
+end
+
+function love.keyreleased(key)
+	if key == " " then
+		moving2 = false
 	end
 end
 
