@@ -98,7 +98,7 @@ function love.mousepressed(x,y,button)
 			end
 		elseif mode == "green" or mode == "red" then
 			for i,v in ipairs(points) do
-				if dist(v,{x=x,y=y}) < POINT_HIT_DISTANCE then
+				if dist(v,{x=x,y=y}) < POINT_HIT_DISTANCE and not containsPoint(currentTriangle,v)then
 						currentTriangle[#currentTriangle+1] = v
 					if #currentTriangle == 3 then
 						local t = triangle:new(mode,currentTriangle)
@@ -149,3 +149,4 @@ function dist(o1,o2)
 	local b = o1.y - o2.y
 	return math.sqrt(a*a+b*b)
 end
+

@@ -17,6 +17,16 @@ function point:simplify()
 
 end
 
+
+function containsPoint(l,p)
+	for i,v in ipairs(l) do
+		if samePoint(v,p) then
+			return true
+		end
+	end
+	return false
+end
+
 function getPointIndex(point)
 	for i,v in ipairs(points) do
 		if samePoint(point,v) then
