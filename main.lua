@@ -97,6 +97,11 @@ function love.mousepressed(x,y,button)
 				points[#points+1] = p
 			end
 		elseif mode == "delete" then
+			local p = findPoint(x,y,POINT_HIT_DISTANCE)
+			if p then
+				p:remove()
+				return
+			end
 			for i,v in ipairs(triangles) do
 				if v:contains(x,y) then
 					v:remove()

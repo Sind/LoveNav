@@ -11,6 +11,14 @@ function point:addTriangle(t)
 	self.triangles[#self.triangles+1] = t
 end
 
+function point:remove()
+	while #self.triangles > 0 do
+		self.triangles[1]:remove()
+	end
+	local i = getPointIndex(self)
+	table.remove(points,i)
+end
+
 function point:removeTriangle(t)
 	for i,v in ipairs(self.triangles) do
 		if sameTriangle(v,t) then
