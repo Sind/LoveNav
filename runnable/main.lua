@@ -2,7 +2,7 @@
 function love.load()
 	require "class"
 	require "navmesh"
-	level = require "level1"
+	level = require "level"
 	n = navmesh:new(level)
 	background = love.graphics.newImage("background.png")
 	previousPoint = {x = 0, y = 0}
@@ -17,7 +17,7 @@ function love.mousepressed(x,y)
 	previousPoint = currentPoint
 	local x, y = love.mouse.getPosition()
 	currentPoint = {x = x, y = y}
-	cPath = n:findPath(previousPoint.x,previousPoint.y,currentPoint.x,currentPoint.y)
+	portals = n:findPath(previousPoint.x,previousPoint.y,currentPoint.x,currentPoint.y)
 end
 function love.draw()
 	love.graphics.draw(background)

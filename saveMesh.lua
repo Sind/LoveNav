@@ -31,7 +31,7 @@ function saveMesh()
 			end
 		end
 	end
-	persistence.store("storage.lua", {points = newpoints, triangles = newtriangles});
+	persistence.store("level.lua", {points = newpoints, triangles = newtriangles});
 
 end
 

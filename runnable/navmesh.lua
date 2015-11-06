@@ -73,8 +73,12 @@ function navmesh:findTriangle(x,y)
 end
 
 function navmesh:findPath(x1,y1,x2,y2)
-	local coarsePath = self:findCoarsePath(x1,y1,x2,y2)
-	return coarsePath
+	coarsePath = self:findCoarsePath(x1,y1,x2,y2)
+	if not coarsePath then return nil end
+	local portals = self:getPortals(x1,y1,x2,y2,coarsePath)
+	local path = self:funnel(portals)
+	-- local path = self
+	return portals
 end
 
 function navmesh:findCoarsePath(x1,y1,x2,y2)
@@ -155,11 +159,51 @@ function navmesh:findCoarsePath(x1,y1,x2,y2)
 		end
 	end
 end
+
+function navmesh:getPortals(x1,y1,x2,y2,coarsePath)
+	local currentTriangle = coarsePath[1]
+	local portals = {{x2,y2}}
+	for i = 2, #coarsePath do
+		nextTriangle = coarsePath[i]
+		local p1,p2 = self:getPortal(currentTriangle,nextTriangle)
+		portals[#portals+1] = {self.vertexes[p1].x,self.vertexes[p1].y}
+		portals[#portals+1] = {self.vertexes[p2].x,self.vertexes[p2].y}
+		currentTriangle = nextTriangle
+	end
+	portals[#portals+1] = {x1,y1}
+	portals[#portals+1] = {x1,y1}
+
+	return portals
+end
+
+function navmesh:getPortal(t1,t2)
+	st1 = self.triangles[t1]
+	st2 = self.triangles[t2]
+	for i,v in ipairs(st1.vertexes) do
+		for j,u in ipairs(st2.vertexes) do
+			if u == v then
+				local previ = ((i-1) == 0 and 3 or i-1)
+				local nextj = ((j+1) == 4 and 1 or j+1)
+				if st1.vertexes[previ] == st2.vertexes[nextj] then
+					return v,st1.vertexes[previ]
+				end 
+			end
+		end
+	end
+end
+
+function navmesh:funnel(portals)
+	local apex = portals[1]
+	for i = 2, #portals, 2 do
+		
+	end
+end
+
 function navmesh:draw()
 	for i,v in ipairs(self.triangles) do
 		if v.passable then
-			if cPath and table.getIndex(cPath,i) then
-				love.graphics.setColor(255, 255, 0, 100)
+			if coarsePath and table.getIndex(coarsePath,i) then
+				love.graphics.setColor(355, 355, 0, 100)
 			else
 				love.graphics.setColor(0, 255, 0, 100)
 			end
