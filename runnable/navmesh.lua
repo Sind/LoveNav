@@ -1,5 +1,6 @@
 vertex = class()
 triangle = class()
+path = class()
 navmesh = class()
 
 function vertex:init(point)
@@ -9,6 +10,20 @@ end
 
 function vertex.determinant(x1,y1,x2,y2)
 	return x1*y2 - x2*y1
+end
+
+function pequal(a,b)
+	return a[1] == b[1] and a[2] == b[2]
+end
+
+function triarea(a,b,c)
+	local ax = b[1] - a[1]
+	local ay = b[2] - a[2]
+	local bx = c[1] - a[1]
+	local by = c[2] - a[2]
+	local ans = vertex.determinant(bx,by,ax,ay)
+	print("ans", ans)
+	return ans
 end
 
 
@@ -43,6 +58,40 @@ function triangle:calculateEdges()
 	end
 end
 
+function path:init()
+	self.points = {}
+	self.length = 0
+	self.poistion = 0
+end
+
+function path:addPoint(p)
+	self.points[#self.points+1] = p
+	if #self.points == 1 then return end
+	-- local ydist = self.points[#self.points]
+	-- local dist = math.sqrt(xdist*xdist + ydist*ydist)
+	-- self.length =  self.length + dist
+end
+
+function path:move(dist)
+	self.position = self.position + dist
+	if self.position >= self.length then
+		return self.points[#self.points], true
+	end
+	local realPosition = 2 --TODO: calculate position 
+	return realPosition, false
+end
+
+function path:draw()
+	love.graphics.setColor(128, 128, 128, 255)
+	for i = 2, #self.points do
+		local s = self.points[i-1]
+		local e = self.points[i]
+		love.graphics.line(s[1], s[2], e[1], e[2])
+	end
+	love.graphics.setColor(255, 255, 255, 255)
+end
+
+
 function navmesh:init(map)
 	self.vertexes = {}
 	self.triangles = {}
@@ -76,9 +125,14 @@ function navmesh:findPath(x1,y1,x2,y2)
 	coarsePath = self:findCoarsePath(x1,y1,x2,y2)
 	if not coarsePath then return nil end
 	local portals = self:getPortals(x1,y1,x2,y2,coarsePath)
-	local path = self:funnel(portals)
+	local tpath = self:funnel(portals)
 	-- local path = self
-	return portals
+	print("path")
+	for i,v in ipairs(tpath.points) do
+		print(v[1], v[2])
+	end
+	print("endpath")
+	return portals, tpath
 end
 
 function navmesh:findCoarsePath(x1,y1,x2,y2)
@@ -162,7 +216,7 @@ end
 
 function navmesh:getPortals(x1,y1,x2,y2,coarsePath)
 	local currentTriangle = coarsePath[1]
-	local portals = {{x2,y2}}
+	local portals = {{x2,y2},{x2,y2}}
 	for i = 2, #coarsePath do
 		nextTriangle = coarsePath[i]
 		local p1,p2 = self:getPortal(currentTriangle,nextTriangle)
@@ -193,11 +247,124 @@ function navmesh:getPortal(t1,t2)
 end
 
 function navmesh:funnel(portals)
-	local apex = portals[1]
-	for i = 2, #portals, 2 do
-		
+	local truePath = path:new()
+	for i,v in ipairs(portals) do 
+		print("portal", i,v[1],v[2])
 	end
+
+	local apexIndex = 1
+	local leftIndex = 1
+	local rightIdex = 1
+
+	local apex = portals[1]
+	local left = portals[1]
+	local right = portals[2]
+
+	truePath:addPoint(apex)
+
+	local i = 2
+
+	while i <= #portals/2 do
+		nleft = portals[i*2-1]
+		nright = portals[i*2]
+
+
+		skip = false
+		if triarea(apex,right,nright) >= 0 then
+			if pequal(apex,right) or triarea(apex,left,nright) < 0 then
+				right = nright
+				rightIndex = i
+			else
+				--left is new  apex
+				truePath:addPoint(left)
+				apexIndex = leftIndex
+				apex = left
+
+				left = apex
+				right = apex
+				leftIndex = apexIndex
+				rightIndex = apexIndex
+				i = apexIndex
+
+				skip = true
+			end
+		end
+		if not skip then 
+			if triarea(apex,left,nleft) <= 0 then
+				if pequal(apex,left) or triarea(apex,right,nleft) > 0 then
+					left = nleft
+					leftIndex = i
+				else
+					--right is new  apex
+					truePath:addPoint(right)
+					apexIndex = rightIndex
+					apex = right
+
+					leftIndex = apexIndex
+					rightIndex = apexIndex
+					left = apex
+					right = apex
+					i = apexIndex
+				end
+			end
+		end
+
+		i = i+1
+	end
+	truePath:addPoint(portals[#portals])
+	return truePath
+		-- -- while portals[apexPoint][1] == portals[apexPoint+2][1]
+		-- --   and portals[apexPoint][2] == portals[apexPoint+2][2] do
+		-- -- 	apexPoint = apexPoint + 2
+		-- -- end
+		-- local angle = navmesh.getAngle(apex,left,right)
+		-- local nleftP = leftPoint
+		-- local nrightP = rightPoint
+		-- local nleft = left
+		-- local rleft = right
+		-- local newAngle = angle
+		-- while true do
+		-- 	nleftP = nleftP + 2
+		-- 	nleft = portals[nleftP]
+		-- 	newAngle = navmesh.getAngle(apex,nleft,right)
+		-- 	if newAngle < 0 then
+		-- 		apexPoint = rightPoint
+		-- 		break
+		-- 	elseif newAngle < angle then
+		-- 		leftPoint = nleftP
+		-- 		left = nleft
+		-- 		angle = newAngle
+		-- 	end
+		-- 	nrightP = nrightP + 2
+		-- 	nright = portals[nrightP]
+		-- 	newAngle = navmesh.getAngle(apex,left,nright)
+		-- 	if newAngle < 0 then
+		-- 		apexPoint = leftPoint
+		-- 		break
+		-- 	elseif newAngle < angle then
+		-- 		rightPoint = nrightP
+		-- 		right = nright
+		-- 		angle = newAngle
+		-- 	end
+		-- end
+	-- end
 end
+
+-- function navmesh.getAngle(apex,left,right)
+-- 	print(apex,left,right)
+-- 	local lvec = {left[1]-apex[1],left[2]-apex[2]}
+-- 	local rvec = {right[1]-apex[1],right[2]-apex[2]}
+-- 	local la = math.atan2(lvec[2],lvec[1])
+-- 	local ra = math.atan2(rvec[2],rvec[1])
+-- 	local angle = la-ra
+-- 	while angle >= math.pi do
+-- 		angle = angle - 2 * math.pi
+-- 	end
+-- 	while angle < -math.pi do
+-- 		angle = angle + 2 * math.pi
+-- 	end
+-- 	return angle
+-- end
 
 function navmesh:draw()
 	for i,v in ipairs(self.triangles) do
