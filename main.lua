@@ -138,7 +138,7 @@ function love.mousereleased(x,y,button)
 end
 
 function love.keypressed(key)
-	if moving or monving2 then return end
+	if moving or moving2 then return end
 	if key == "escape" then
 		saveMesh()
 		love.event.quit()
@@ -146,8 +146,10 @@ function love.keypressed(key)
 		mode = "points"
 	elseif key == "g" or key == "2" then
 		mode = "green"
+		currentTriangle = {}
 	elseif key == "r" or key == "3" then
 		mode = "red"
+		currentTriangle = {}
 	elseif key == "d" or key == "4" then
 		mode = "delete"
 	elseif key == "space" then
