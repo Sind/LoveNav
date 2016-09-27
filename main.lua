@@ -10,7 +10,7 @@ TRIANGLE_LINE = {green = {0,200,0,100}, red = {200,0,0,100}}
 TRIANGLE_FILL = {green = {0,255,0,100}, red = {255,0,0,100}}
 POINTER_COLOR = {points = {0,0,255,100}, green = {0,255,0,100},red = {255,0,0,100}, delete = {0,0,0,100}}
 
-SCALING_FACTOR = 0.95
+SCALING_FACTOR = 0.2
 function love.load()
 	require "class"
 	require "point"
@@ -19,7 +19,7 @@ function love.load()
 	require "persistence"
 	mode = "points"
 	love.window.setMode(0,0,{fullscreen = true})
-	WINDOW_WIDTH, WINDOW_HEIGHT = love.window.getDimensions()
+	WINDOW_WIDTH, WINDOW_HEIGHT = love.graphics.getDimensions()
 	image = love.graphics.newImage("background.png")
 	points = {}
 	triangles = {}
@@ -73,24 +73,14 @@ end
 
 function love.mousepressed(x,y,button)
 	if moving or moving2 then return end
-	if button == "m" then
+	if button == 3 then
 		moving = true
 	end
 	x = x - translate.x
 	y = y - translate.y
 	x = x / scale
 	y = y / scale
-	if button == "wd" or button == "wu" then
-		local oldscale = scale
-		if button == "wd" then
-			scale = scale * SCALING_FACTOR
-		elseif button == "wu" then
-			scale = scale / SCALING_FACTOR
-		end
-		translate.x = translate.x + x * (oldscale - scale)
-		translate.y = translate.y + y * (oldscale - scale)
-	end
-	if button == "l" then
+	if button == 1 then
 		if mode == "points" then
 			if not findPoint(x,y,MIN_POINT_DISTANCE) then
 				local p = point:new(x,y)
@@ -121,6 +111,20 @@ function love.mousepressed(x,y,button)
 		end
 	end
 end
+
+function love.wheelmoved(wx,wy)
+	x, y = love.mouse.getPosition();
+	x = x - translate.x
+	y = y - translate.y
+	x = x / scale
+	y = y / scale
+	local oldscale = scale
+	scale = scale + wy * SCALING_FACTOR
+	translate.x = translate.x + x * (oldscale - scale)
+	translate.y = translate.y + y * (oldscale - scale)
+
+end
+
 function love.mousemoved(x,y,dx,dy)
 	if moving or moving2 then
 		translate.x = translate.x + dx
@@ -128,7 +132,7 @@ function love.mousemoved(x,y,dx,dy)
 	end
 end
 function love.mousereleased(x,y,button)
-	if button == "m" then
+	if button == 3 then
 		moving = false
 	end
 end
@@ -146,13 +150,13 @@ function love.keypressed(key)
 		mode = "red"
 	elseif key == "d" or key == "4" then
 		mode = "delete"
-	elseif key == " " then
+	elseif key == "space" then
 		moving2 = true
 	end
 end
 
 function love.keyreleased(key)
-	if key == " " then
+	if key == "space" then
 		moving2 = false
 	end
 end
