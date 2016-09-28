@@ -35,7 +35,7 @@ function triangle:init(navmesh,primitiveTriangle)
 	local c = navmesh.vertexes[self.vertexes[3]]
 	self.center = {x = (a.x+b.x+c.x)/3, y = (a.y+b.y+c.y)/3}
 	self.neighbors = primitiveTriangle.neighbors
-	self.passable = primitiveTriangle.passable
+	self.passable = true
 	self.edges = {}
 end
 
@@ -313,58 +313,7 @@ function navmesh:funnel(portals)
 	end
 	truePath:addPoint(portals[#portals])
 	return truePath
-		-- -- while portals[apexPoint][1] == portals[apexPoint+2][1]
-		-- --   and portals[apexPoint][2] == portals[apexPoint+2][2] do
-		-- -- 	apexPoint = apexPoint + 2
-		-- -- end
-		-- local angle = navmesh.getAngle(apex,left,right)
-		-- local nleftP = leftPoint
-		-- local nrightP = rightPoint
-		-- local nleft = left
-		-- local rleft = right
-		-- local newAngle = angle
-		-- while true do
-		-- 	nleftP = nleftP + 2
-		-- 	nleft = portals[nleftP]
-		-- 	newAngle = navmesh.getAngle(apex,nleft,right)
-		-- 	if newAngle < 0 then
-		-- 		apexPoint = rightPoint
-		-- 		break
-		-- 	elseif newAngle < angle then
-		-- 		leftPoint = nleftP
-		-- 		left = nleft
-		-- 		angle = newAngle
-		-- 	end
-		-- 	nrightP = nrightP + 2
-		-- 	nright = portals[nrightP]
-		-- 	newAngle = navmesh.getAngle(apex,left,nright)
-		-- 	if newAngle < 0 then
-		-- 		apexPoint = leftPoint
-		-- 		break
-		-- 	elseif newAngle < angle then
-		-- 		rightPoint = nrightP
-		-- 		right = nright
-		-- 		angle = newAngle
-		-- 	end
-		-- end
-	-- end
 end
-
--- function navmesh.getAngle(apex,left,right)
--- 	print(apex,left,right)
--- 	local lvec = {left[1]-apex[1],left[2]-apex[2]}
--- 	local rvec = {right[1]-apex[1],right[2]-apex[2]}
--- 	local la = math.atan2(lvec[2],lvec[1])
--- 	local ra = math.atan2(rvec[2],rvec[1])
--- 	local angle = la-ra
--- 	while angle >= math.pi do
--- 		angle = angle - 2 * math.pi
--- 	end
--- 	while angle < -math.pi do
--- 		angle = angle + 2 * math.pi
--- 	end
--- 	return angle
--- end
 
 function navmesh:draw()
 	for i,v in ipairs(self.triangles) do

@@ -1,8 +1,8 @@
 point = class()
 
 function point:init(x,y)
-	self.x = x
-	self.y = y
+	self[1] = x
+	self[2] = y
 	self.triangles = {}
 end
 
@@ -28,9 +28,8 @@ function point:removeTriangle(t)
 end
 
 function point:simplify()
-	local simplePoint = {x = self.x, y = self.y}
+	local simplePoint = {x = self[1], y = self[2]}
 	return simplePoint
-
 end
 
 
@@ -53,7 +52,7 @@ end
 
 function findPoint(x,y,distance)
 	for i,v in ipairs(points) do
-		if dist({x = x, y = y},v) < distance then
+		if dist({[1] = x, [2] = y},v) < distance then
 			return v
 		end
 	end
@@ -61,7 +60,7 @@ function findPoint(x,y,distance)
 end
 
 function samePoint(a,b)
-	return (a.x == b.x and a.y == b.y)
+	return (a[1] == b[1] and a[2] == b[2])
 end
 
 

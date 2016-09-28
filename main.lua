@@ -6,9 +6,9 @@ LINE_WIDTH = 4
 
 WHITE = {255,255,255}
 POINT_COLOR = {0,0,255,200}
-TRIANGLE_LINE = {green = {0,200,0,100}, red = {200,0,0,100}}
-TRIANGLE_FILL = {green = {0,255,0,100}, red = {255,0,0,100}}
-POINTER_COLOR = {points = {0,0,255,100}, green = {0,255,0,100},red = {255,0,0,100}, delete = {0,0,0,100}}
+TRIANGLE_LINE = {0,200,0,100}
+TRIANGLE_FILL = {0,255,0,100}
+POINTER_COLOR = {points = {0,0,255,100}, polygon = {0, 255, 0, 100}, delete = {0,0,0,100}}
 
 SCALING_FACTOR = 0.2
 function love.load()
@@ -25,7 +25,7 @@ function love.load()
 	triangles = {}
 	translate = {x=0,y=0}
 	scale = 1
-	currentTriangle ={}
+	currentPolygon = {}
 	love.graphics.setLineWidth( LINE_WIDTH )
 	latestPosition = {x=0,y=0}
 end
@@ -47,18 +47,18 @@ function love.draw()
 	love.graphics.draw(image)
 	love.graphics.setColor(POINT_COLOR)
 	for i,v in ipairs(points) do
-		love.graphics.circle("fill",v.x,v.y,POINT_RADIUS)
+		love.graphics.circle("fill",v[1],v[2],POINT_RADIUS)
 	end
 	for i,v in ipairs(triangles) do
 		v:draw()
 	end
 	love.graphics.setColor(POINTER_COLOR[mode])
-	if mode == "green" or mode == "red" then
-		if #currentTriangle > 0 then
+	if mode == "polygon" then
+		if #currentPolygon > 0 then
 			local line = {}
-			for i,v in ipairs(currentTriangle) do
-				line[#line+1] = v.x
-				line[#line+1] = v.y
+			for i,v in ipairs(currentPolygon) do
+				line[#line+1] = v[1]
+				line[#line+1] = v[2]
 			end
 			line[#line+1] = latestPosition.x
 			line[#line+1] = latestPosition.y
@@ -97,19 +97,41 @@ function love.mousepressed(x,y,button)
 					v:remove()
 				end
 			end
-		elseif mode == "green" or mode == "red" then
+		elseif mode == "polygon" then
 			for i,v in ipairs(points) do
-				if dist(v,{x=x,y=y}) < POINT_HIT_DISTANCE and not containsPoint(currentTriangle,v)then
-						currentTriangle[#currentTriangle+1] = v
-					if #currentTriangle == 3 then
-						local t = triangle:new(mode,currentTriangle)
-						triangles[#triangles+1] = t
-						currentTriangle = {}
+				if dist(v,{[1] = x, [2] = y}) < POINT_HIT_DISTANCE then
+					if #currentPolygon > 2 and samePoint(v,currentPolygon[1]) then
+						savePolygon()
+						currentPolygon = {}
+					elseif not containsPoint(currentPolygon,v) then
+						currentPolygon[#currentPolygon+1] = v
 					end
 				end
 			end
 		end
 	end
+end
+
+
+function savePolygon()
+	local line = {}
+	for i,v in ipairs(currentPolygon) do
+		line[#line+1] = v[1]
+		line[#line+1] = v[2]
+	end
+	local ts = love.math.triangulate(line)
+	for i,v in ipairs(ts) do
+		--one triangle
+		local tr = {}
+		for i = 1,5,2 do
+			local px = v[i]
+			local py = v[i+1]
+			tr[#tr+1] = findPoint(px,py,POINT_RADIUS)
+		end
+		local t = triangle:new(tr)
+		triangles[#triangles+1] = t
+	end
+
 end
 
 function love.wheelmoved(wx,wy)
@@ -144,13 +166,10 @@ function love.keypressed(key)
 		love.event.quit()
 	elseif key == "p" or key == "b" or key == "1" then
 		mode = "points"
-	elseif key == "g" or key == "2" then
-		mode = "green"
-		currentTriangle = {}
-	elseif key == "r" or key == "3" then
-		mode = "red"
-		currentTriangle = {}
-	elseif key == "d" or key == "4" then
+	elseif key == "4" or key == "g" then
+		mode = "polygon"
+		currentPolygon = {}
+	elseif key == "d" or key == "5" then
 		mode = "delete"
 	elseif key == "space" then
 		moving2 = true
@@ -164,8 +183,8 @@ function love.keyreleased(key)
 end
 
 function dist(o1,o2)
-	local a = o1.x - o2.x
-	local b = o1.y - o2.y
+	local a = o1[1] - o2[1]
+	local b = o1[2] - o2[2]
 	return math.sqrt(a*a+b*b)
 end
 

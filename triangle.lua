@@ -1,18 +1,17 @@
 triangle = class()
 
-function triangle:init(color,points)
-	self.color = color
+function triangle:init(points)
 	self.points = points
-	self.coordinates = {points[1].x,points[1].y,points[2].x,points[2].y,points[3].x,points[3].y}
+	self.coordinates = {points[1][1],points[1][2],points[2][1],points[2][2],points[3][1],points[3][2]}
 	for i,v in ipairs(points) do
 		v:addTriangle(self)
 	end
 end
 
 function triangle:draw()
-	love.graphics.setColor(TRIANGLE_FILL[self.color])
+	love.graphics.setColor(TRIANGLE_FILL)
 	love.graphics.polygon("line",self.coordinates)
-	love.graphics.setColor(TRIANGLE_LINE[self.color])
+	love.graphics.setColor(TRIANGLE_LINE)
 	love.graphics.polygon("fill",self.coordinates)
 	love.graphics.setColor(WHITE)
 end
@@ -27,23 +26,23 @@ function triangle:simplify()
 	else
 		tpoints = {a,c,b}
 	end
-	return {points = tpoints, neighbors = {}, passable = (self.color == "green")}
+	return {points = tpoints, neighbors = {}}
 end
 
 function triangle:orientation()
 	local a = self.points[1]
 	local b = self.points[2]
 	local c = self.points[3]
-	return determinant(b.x-a.x, b.y-a.y, c.x-a.x, c.y-a.y) < 0
+	return determinant(b[1]-a[1], b[2]-a[2], c[1]-a[1], c[2]-a[2]) < 0
 end
 
 function triangle:contains(x,y)
 	local a = self.points[1]
 	local b = self.points[2]
 	local c = self.points[3]
-	local ad = determinant(b.x-a.x,b.y-a.y,x-a.x,y-a.y)
-	local bd = determinant(c.x-b.x,c.y-b.y,x-b.x,y-b.y)
-	local cd = determinant(a.x-c.x,a.y-c.y,x-c.x,y-c.y)
+	local ad = determinant(b[1]-a[1],b[2]-a[2],x-a[1],y-a[2])
+	local bd = determinant(c[1]-b[1],c[2]-b[2],x-b[1],y-b[2])
+	local cd = determinant(a[1]-c[1],a[2]-c[2],x-c[1],y-c[2])
 	local adb = (ad < 0)
 	local bdb = (bd < 0)
 	local cdb = (cd < 0)

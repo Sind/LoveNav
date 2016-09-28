@@ -19,15 +19,11 @@ function saveMesh()
 	--calculate neighbor info of triangles
 	for i = 1, #newtriangles-1 do
 		local u = newtriangles[i]
-		if u.passable then
-			for j = i+1, #newtriangles do
-				local v = newtriangles[j]
-				if v.passable then
-					if shareEdge(u,v) then
-						u.neighbors[#u.neighbors+1] = j
-						v.neighbors[#v.neighbors+1] = i
-					end
-				end
+		for j = i+1, #newtriangles do
+			local v = newtriangles[j]
+			if shareEdge(u,v) then
+				u.neighbors[#u.neighbors+1] = j
+				v.neighbors[#v.neighbors+1] = i
 			end
 		end
 	end
