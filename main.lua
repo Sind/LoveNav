@@ -10,7 +10,7 @@ TRIANGLE_LINE = {0,200,0,100}
 TRIANGLE_FILL = {0,255,0,100}
 POINTER_COLOR = {points = {0,0,255,100}, polygon = {0, 255, 0, 100}, delete = {0,0,0,100}}
 
-SCALING_FACTOR = 0.2
+SCALING_FACTOR = 0.95
 function love.load()
 	require "class"
 	require "point"
@@ -135,16 +135,7 @@ function savePolygon()
 end
 
 function love.wheelmoved(wx,wy)
-	x, y = love.mouse.getPosition();
-	x = x - translate.x
-	y = y - translate.y
-	x = x / scale
-	y = y / scale
-	local oldscale = scale
-	scale = scale + wy * SCALING_FACTOR
-	translate.x = translate.x + x * (oldscale - scale)
-	translate.y = translate.y + y * (oldscale - scale)
-
+	zoom(wy)
 end
 
 function love.mousemoved(x,y,dx,dy)
@@ -173,6 +164,10 @@ function love.keypressed(key)
 		mode = "delete"
 	elseif key == "space" then
 		moving2 = true
+	elseif key == "+" then
+		zoom(1)
+	elseif key == "-" then
+		zoom(-1)
 	end
 end
 
@@ -188,3 +183,14 @@ function dist(o1,o2)
 	return math.sqrt(a*a+b*b)
 end
 
+function zoom(direction)
+	local x, y = love.mouse.getPosition();
+	x = x - translate.x
+	y = y - translate.y
+	x = x / scale
+	y = y / scale
+	local oldscale = scale
+	scale = scale * math.pow(SCALING_FACTOR, -direction)
+	translate.x = translate.x + x * (oldscale - scale)
+	translate.y = translate.y + y * (oldscale - scale)
+end
