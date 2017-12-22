@@ -1,6 +1,7 @@
 triangle = class()
 
-function triangle:init(points)
+function triangle:init(points, mesh)
+	self.mesh = mesh
 	self.points = points
 	self.coordinates = {points[1][1],points[1][2],points[2][1],points[2][2],points[3][1],points[3][2]}
 	for i,v in ipairs(points) do
@@ -18,9 +19,9 @@ end
 
 function triangle:simplify()
 	local tpoints = {}
-	local a = getPointIndex(self.points[1])
-	local b = getPointIndex(self.points[2])
-	local c = getPointIndex(self.points[3])
+	local a = self.mesh:getPointIndex(self.points[1])
+	local b = self.mesh:getPointIndex(self.points[2])
+	local c = self.mesh:getPointIndex(self.points[3])
 	if self:orientation() then
 		tpoints = {a,b,c}
 	else
@@ -36,7 +37,8 @@ function triangle:orientation()
 	return determinant(b[1]-a[1], b[2]-a[2], c[1]-a[1], c[2]-a[2]) < 0
 end
 
-function triangle:contains(x,y)
+function triangle:contains(point)
+	x, y = point[1], point[2]
 	local a = self.points[1]
 	local b = self.points[2]
 	local c = self.points[3]
@@ -49,22 +51,8 @@ function triangle:contains(x,y)
 	return (adb and bdb and cdb) or (not (adb or bdb or cdb))
 end
 
-function triangle:remove()
-	for i,v in ipairs(self.points) do
-		v:removeTriangle(self)
+triangle:setmetamethod("__eq",
+	function (a,b)
+		return (a.points[1] == b.points[1]) and (a.points[2] == b.points[2]) and (a.points[3] == b.points[3])
 	end
-	local i = getTriangleIndex(self)
-	table.remove(triangles,i)
-end
-
-function getTriangleIndex(triangle)
-	for i,v in ipairs(triangles) do
-		if sameTriangle(triangle, v) then
-			return i
-		end
-	end
-end
-
-function sameTriangle(a,b)
-	return (samePoint(a.points[1],b.points[1]) and samePoint(a.points[2],b.points[2]) and samePoint(a.points[3],b.points[3]))
-end
+)

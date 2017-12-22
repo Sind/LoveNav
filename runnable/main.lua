@@ -2,11 +2,30 @@
 function love.load()
 	require "class"
 	require "navmesh"
+	require "background"
 	level = require "level"
 	n = navmesh:new(level)
-	background = love.graphics.newImage("background.png")
 	previousPoint = {x = 0, y = 0}
 	currentPoint = {x = 0, y = 0}
+	
+	love.window.setMode(0,0,{highdpi = true, fullscreen = true})
+
+	WINDOW_WIDTH, WINDOW_HEIGHT = love.graphics.getDimensions()
+	
+
+	background = background("background.png")
+	
+	screen = {}
+	screen.translate = {x=0,y=0}
+
+	local imagewider = WINDOW_HEIGHT / background.height > WINDOW_WIDTH / background.width
+	if imagewider then
+		screen.scale = WINDOW_WIDTH / background.width
+		screen.translate.y = (WINDOW_HEIGHT - background.height * screen.scale) / 2
+	else
+		screen.scale = WINDOW_HEIGHT / background.height
+		screen.translate.x = (WINDOW_WIDTH - background.width * screen.scale) / 2
+	end
 	-- a = navmesh.getAngle({0,0},{0,50},{50,0})
 	-- print(a)
 end
@@ -26,8 +45,13 @@ function drawportals(portals)
 end
 
 function love.mousepressed(x,y)
+
+	x = x - screen.translate.x
+	y = y - screen.translate.y
+	x = x / screen.scale
+	y = y / screen.scale
+	
 	previousPoint = currentPoint
-	local x, y = love.mouse.getPosition()
 	currentPoint = {x = x, y = y}
 	portals, tpath = n:findPath(previousPoint.x,previousPoint.y,currentPoint.x,currentPoint.y)
 	if portals == nil then return end
@@ -36,8 +60,12 @@ function love.mousepressed(x,y)
 	end
 	print()
 end
+
 function love.draw()
-	love.graphics.draw(background)
+	love.graphics.translate(screen.translate.x, screen.translate.y)
+	love.graphics.scale(screen.scale)
+
+	background:draw()
 	n:draw()
 	love.graphics.setColor(0, 255, 0, 255)
 	love.graphics.circle("fill",previousPoint.x , previousPoint.y, 2)
